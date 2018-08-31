@@ -2,62 +2,176 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-    crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" text="text/css" href="./style.css">
-
-
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <title>Document</title>
 </head>
 
 <body>
-  <div class="container">
-    <div class="jumbotron" style="background-color: black">
-      <h1 class="text-center" style="color: white">
-        <strong>
-          <i class="fa fa-newspaper-o"></i> New York Times Search</strong>
-      </h1>
-    </div>
     <div class="container">
-      <div class="jumbotron">
-        <form>
-          <div class="search">
-            <label for="searchterm">Search Term</label>
-            <input type="search" class="form-control" id="searchterm">
-          </div>
-          <div class="form-group">
-            <br>
-            <div class="Records">
-              <label for="numrecords">Number of Records to Retrieve</label>
-              <input type="records" class="form-control " id="Records" placeholder="# of articles">
-              <br>
-            </div>
-            <div class="startyea">
-              <label for="startyear">Start Year</label>
-              <i class="fa fa-calendar" style="font-size:24px "></i>
-              <input type="start-year" class="form-control" id="searchterm">
-              <br>
-            </div>
-            <div class="endyear">
-              <label for="endyear">End Year</label>
-              <i class="fa fa-calendar" style="font-size:24px "></i>
-              <input type="end-year" class="form-control" id="searchterm">
-            </div>
-            <br>
-            <button type="search" class="btn btn-primary" class="button">Search</button>
-            <button type="clear" class="btn btn-primary" class="button">Clear Results</button>
-        </form>
-        </div>
-      </div>
+        <div class="jumbotron">
+            <h1 class="display-4">New York Times Article Search</h1>
+            <form>
+                <div class="form-group">
+                    <label for="searchterm">Search Term</label>
+                    <input type="" class="form-control" id="searchterm topicName">
+                </div>
+                <div class="form-group">
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js " integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 "
-        crossorigin="anonymous "></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js " integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy "
-        crossorigin="anonymous "></script>
+                    <div class="form-group">
+                        <label for="exampleFormControlSelect2">Number of Records to Retrieve</label>
+                        <select multiple class="form-control" id="exampleFormControlSelect2">
+                            <option>1</option>
+                            <option>5</option>
+                            <option>10</option>
+                            <option>15</option>
+                            <option>20</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="searchterm">Start Year (Optional)</label>
+                        <input type="date" class="form-control" min="1950-01-01" id="startYr">
+                    </div>
+                    <div class="form-group">
+                        <label for="searchterm">End Year (Optional)</label>
+                        <input type="date" class="form-control" min="1950-01-01" id="endYr">
+                    </div>
+                    <button type="submit" class="btn btn-primary submit">Search</button>
+                    <button type="clear" class="btn btn-primary clear">Clear Results</button>
+            </form>
+            </div>
+
+            <div class="articles"></div>
+        </div>
 </body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+<script>
+
+    var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+    var topic = 'taco';
+    var userResults = 10; //default
+    var numOfResults;
+    var past10;
+    var beginDate = 19901114;
+    var endDate = 20171114;
+    var currPage = 1;
+    var articlesArr = [];
+
+    //q is seearch by head line
+    //fq  ?fq:*search term*
+    //begin_date ?'begin_date':*some date*
+    //end_date ?'end_date': *some date*
+
+    function getArticles() {
+        url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+        url += '?' + $.param({
+            'api-key': "f8cf54fb1ddc4ddf8a4e7e8c11fe1de4",
+            'q': topic,
+            'begin_date': "19901114",
+            'end_date': "19941114",
+            'page': currPage
+        });
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function (result) {
+                articlesArr = [];
+                console.log(result.response.docs);
+                articlesArr = result.response.docs;
+                if (userResults > 10) {
+                    showArticles(10);
+                } else {
+                    showArticles(userResults);
+                }
+            }
+        }).fail(function (err) {
+            throw err;
+        });
+    }
+
+    function showArticles(limit) {
+
+        for (var i = 0; i < limit; i++) {
+            var dateSplit = articlesArr[i].pub_date.split('T');
+            userResults--;
+            $('.articles').append(`
+        <div id='article'>
+        <h3>${articlesArr[i].headline.main}</h3>
+        <p>${dateSplit[0]}</p>
+        <p>${articlesArr[i].snippet}</p>
+        <a href="${articlesArr[i].web_url}">Link to article</a>
+        <hr>
+        </div>
+        `)
+        }
+        if (userResults > 0) {
+            $('.articles').append(`<div id='clear'><button id='moreBtn'>Click for more</button></div>`);
+        }
+    }
+
+    $(document).on('click', '#moreBtn', function () {
+        $('#clear').html('');
+        currPage += 1;
+        console.log(currPage++);
+        getArticles();
+    });
+
+    //numOfResults = userResults;
+
+    //getArticles();
+
+    //truncate();
+
+    $('.submit').on('click', function (event) {
+        event.preventDefault()
+        $('.articles').html('');
+        //console.log(parseInt($('#exampleFormControlSelect2').val()))
+        topic = $('#topicName').val();
+        beginDate = refact($('#startYr').val());
+        endDate = refact($('#endYr').val())
+        console.log(beginDate + " to " + endDate);
+        userResults = parseInt($('#exampleFormControlSelect2').val());
+        numOfResults = userResults;
+        getArticles();
+    })
+
+    function refact(str) {
+
+        let a = str.split('-');
+        return a[0] + a[1] + a[2];
+
+    }
+
+    $('.clear').on('click', function () {
+        $('#topicName').attr('value', '');
+        $('#startYr').attr('value', '');
+        $('#endYr').attr('value', '');
+        $('#exampleFormControlSelect2').attr('value', '')
+    })
+
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+    if (dd < 10) {
+        dd = '0' + dd
+    }
+    if (mm < 10) {
+        mm = '0' + mm
+    }
+
+    today = yyyy + '-' + mm + '-' + dd;
+    document.getElementById("endYr").setAttribute("max", today);
+    document.getElementById("startYr").setAttribute("max", today);
+
+</script>
 
 </html>
