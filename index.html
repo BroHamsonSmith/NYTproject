@@ -81,7 +81,7 @@
     function getArticles() {
         url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
         url += '?' + $.param({
-            'api-key': "f8cf54fb1ddc4ddf8a4e7e8c11fe1de4",
+            'api-key': SECRET_API_KEY, //the key is in your slack
             'q': topic,
             'begin_date': "19901114",
             'end_date': "19941114",
